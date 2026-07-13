@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 30px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 70%;
+}
+
+th,
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background: #f2f2f2;
+}
+
+.editable {
+    cursor: pointer;
+    background: #fffbe6;
+}
+
+input[type=number] {
+    width: 60px;
+}
