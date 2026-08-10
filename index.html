@@ -1,60 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Score Editor</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="data.js"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <h2>Student Score Table</h2>
-    
+
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Midterm</th>
-                <th>Final</th>
-                <th>Total</th>
-                <th>Grade</th>
-            </tr>
-        </thead>
-    
-        <tbody id="table-body">
-    
-        </tbody>
-    
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Midterm</th>
+          <th>Final</th>
+          <th>Total</th>
+          <th>Grade</th>
+        </tr>
+      </thead>
+
+      <tbody id="table-body"></tbody>
     </table>
-    
+
     <script>
+      $(document).ready(function () {
+        function getGrade(total) {
+          if (total >= 80) return 'A';
+          if (total >= 70) return 'B';
+          if (total >= 60) return 'C';
+          if (total >= 50) return 'D';
+          return 'F';
+        }
 
-        $(document).ready(function () {
+        function drawTable() {
+          $('#table-body').empty();
 
-            function getGrade(total) {
+          $.each(students, function (index, student) {
+            let total = student.midterm + student.final;
 
-                if (total >= 80) return "A";
-                if (total >= 70) return "B";
-                if (total >= 60) return "C";
-                if (total >= 50) return "D";
-                return "F";
+            let grade = getGrade(total);
 
-            }
-
-            function drawTable() {
-
-                $("#table-body").empty();
-
-                $.each(students, function (index, student) {
-
-                    let total = student.midterm + student.final;
-
-                    let grade = getGrade(total);
-
-                    $("#table-body").append(`
+            $('#table-body').append(`
                     <tr data-index="${index}">
                         <td>${student.id}</td>
                         <td>${student.name}</td>
@@ -72,25 +63,19 @@
                         <td class="grade">${grade}</td>
                     </tr>
                 `);
+          });
+        }
 
-                });
+        drawTable();
 
-            }
+        $(document).on('click', '.editable', function () {
+          let cell = $(this);
 
-            drawTable();
+          if (cell.find('input').length > 0) return;
 
+          let oldValue = cell.text().trim();
 
-
-            $(document).on("click", ".editable", function () {
-
-                let cell = $(this);
-
-                if (cell.find("input").length > 0)
-                    return;
-
-                let oldValue = cell.text().trim();
-
-                cell.html(`
+          cell.html(`
                 <input
                     type="number"
                     min="0"
@@ -98,76 +83,55 @@
                     value="${oldValue}">
             `);
 
-                let input = cell.find("input");
+          let input = cell.find('input');
 
-                input.focus();
+          input.focus();
 
-                input.select();
+          input.select();
 
+          input.on('keydown', function (e) {
+            if (e.key === 'Enter') {
+              let value = parseInt($(this).val());
 
+              if (isNaN(value) || value < 0 || value > 50) {
+                alert('Score must be between 0 and 50');
 
-                input.on("keydown", function (e) {
+                cell.text(oldValue);
 
-                    if (e.key === "Enter") {
+                return;
+              }
 
-                        let value = parseInt($(this).val());
+              let row = cell.closest('tr');
 
-                        if (isNaN(value) || value < 0 || value > 50) {
+              let index = row.data('index');
 
-                            alert("Score must be between 0 and 50");
+              let field = cell.data('field');
 
-                            cell.text(oldValue);
+              students[index][field] = value;
 
-                            return;
+              let total = students[index].midterm + students[index].final;
 
-                        }
+              let grade = getGrade(total);
 
-                        let row = cell.closest("tr");
+              cell.text(value);
 
-                        let index = row.data("index");
+              row.find('.total').text(total);
 
-                        let field = cell.data("field");
+              row.find('.grade').text(grade);
+            }
 
-                        students[index][field] = value;
+            if (e.key === 'Escape') {
+              cell.text(oldValue);
+            }
+          });
 
-                        let total =
-                            students[index].midterm +
-                            students[index].final;
-
-                        let grade = getGrade(total);
-
-                        cell.text(value);
-
-                        row.find(".total").text(total);
-
-                        row.find(".grade").text(grade);
-
-                    }
-
-                    if (e.key === "Escape") {
-
-                        cell.text(oldValue);
-
-                    }
-
-                });
-
-
-
-                input.on("blur", function () {
-
-                    if (cell.find("input").length) {
-
-                        cell.text(oldValue);
-
-                    }
-
-                });
-
-            });
-
+          input.on('blur', function () {
+            if (cell.find('input').length) {
+              cell.text(oldValue);
+            }
+          });
         });
-
+      });
     </script>
-</body>
+  </body>
 </html>
